@@ -74,7 +74,7 @@ func TestAsyncEventWriter(t *testing.T) {
 		t.Errorf("Error handling %v: %v", e, err)
 	})
 	a.Start()
-	if err := w.Write(e); err != nil {
+	if err := a.Write(e); err != nil {
 		t.Fatal(err)
 	}
 	a.Stop()
@@ -108,7 +108,7 @@ func BenchmarkAsyncJSONEventWriter(b *testing.B) {
 	})
 	a.Start()
 	for i := 0; i < b.N; i++ {
-		w.Write(e)
+		a.Write(e)
 	}
 	a.Stop()
 }
