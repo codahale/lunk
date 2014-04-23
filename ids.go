@@ -25,26 +25,31 @@ func (id ID) MarshalJSON() ([]byte, error) {
 	return json.Marshal(id.String())
 }
 
-// UnmarshalJSON decodes the given data as either a hex string or a JSON integer.
+// UnmarshalJSON decodes the given data as either a hexadecimal string or JSON
+// integer.
 func (id *ID) UnmarshalJSON(data []byte) error {
-	var s string
-	if err := json.Unmarshal(data, &s); err != nil { // parse as string
-		var i uint64
-		if err := json.Unmarshal(data, &i); err != nil { // parse as int
-			return err
-		}
-
-		*id = ID(i)
+	i, err := parseJSONString(data)
+	if err == nil {
+		*id = i
 		return nil
 	}
 
-	i, err := strconv.ParseUint(s, 16, 64)
-	if err != nil {
-		return err
+	i, err = parseJSONInt(data)
+	if err == nil {
+		*id = i
+		return nil
 	}
 
-	*id = ID(i)
-	return nil
+	return fmt.Errorf("%s is not a valid ID", data)
+}
+
+// ParseID parses the given string as a hexadecimal string.
+func ParseID(s string) (ID, error) {
+	i, err := strconv.ParseUint(s, 16, 64)
+	if err != nil {
+		return 0, err
+	}
+	return ID(i), nil
 }
 
 // NewID returns a randomly-generated 64-bit ID. This function is thread-safe.
@@ -99,4 +104,27 @@ func init() {
 	n = aes.BlockSize
 	ctr = buf[keySize:]
 	b = make([]byte, aes.BlockSize)
+}
+
+func parseJSONString(data []byte) (ID, error) {
+	var s string
+	if err := json.Unmarshal(data, &s); err != nil {
+		return 0, err
+	}
+
+	i, err := ParseID(s)
+	if err != nil {
+		return 0, err
+	}
+
+	return i, nil
+}
+
+func parseJSONInt(data []byte) (ID, error) {
+	var i uint64
+	if err := json.Unmarshal(data, &i); err != nil {
+		return 0, err
+	}
+
+	return ID(i), nil
 }

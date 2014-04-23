@@ -80,6 +80,25 @@ func TestNewID(t *testing.T) {
 	}
 }
 
+func TestParseID(t *testing.T) {
+	expected := ID(10018181901)
+	actual, err := ParseID(expected.String())
+	if err != nil {
+		t.Error(err)
+	}
+
+	if actual != expected {
+		t.Errorf("Was %v but expected %v", actual, expected)
+	}
+}
+
+func TestParseIDError(t *testing.T) {
+	id, err := ParseID("woo")
+	if err == nil {
+		t.Errorf("Unexpectedly parsed value: %v", id)
+	}
+}
+
 func BenchmarkNewID(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		NewID()
