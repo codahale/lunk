@@ -26,6 +26,15 @@ func TestNewEvent(t *testing.T) {
 	}
 }
 
+func TestNewChildEvent(t *testing.T) {
+	p := NewEvent("blah")
+	c := NewChildEvent("woo", p.ID)
+
+	if p.ID.String() != c.Properties["parent"] {
+		t.Errorf("No parent ID set: %v", c)
+	}
+}
+
 func TestEventAddString(t *testing.T) {
 	e := NewEvent("blah")
 	e.Add("one", "two")

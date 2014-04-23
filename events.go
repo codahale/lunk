@@ -38,6 +38,18 @@ func NewEvent(eventType string) *Event {
 	return e
 }
 
+// NewChildEvent returns a new event of the given type with a parent ID.
+func NewChildEvent(eventType string, parent ID) *Event {
+	e := &Event{
+		ID:         NewID(),
+		Time:       time.Now(),
+		Type:       eventType,
+		Properties: make(map[string]string),
+	}
+	e.Add("parent", parent)
+	return e
+}
+
 // Add associates a named value with the event.
 func (e *Event) Add(key string, value interface{}) {
 	switch value := value.(type) {
@@ -56,9 +68,7 @@ func (e *Event) Add(key string, value interface{}) {
 
 // ChildEvent returns a child event of the given type.
 func (e *Event) ChildEvent(eventType string) *Event {
-	child := NewEvent(eventType)
-	child.Add("parent", e.ID)
-	return child
+	return NewChildEvent(eventType, e.ID)
 }
 
 // String returns the event as a single-line log entry of the event's message,
