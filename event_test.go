@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	span   = ID(1)
+	tree   = ID(1)
 	parent = ID(2)
 )
 
@@ -20,14 +20,14 @@ func (mockEvent) Schema() string {
 
 func TestNewEventMetadata(t *testing.T) {
 	ev := mockEvent{Example: "yay"}
-	e := NewEntry(span, parent, ev)
+	e := NewEntry(tree, parent, ev)
 
 	if e.Schema != "example" {
 		t.Errorf("Unexpected schema: %v", e.Schema)
 	}
 
-	if e.Span != span {
-		t.Errorf("Unexpected span: %v", e.Span)
+	if e.Tree != tree {
+		t.Errorf("Unexpected tree: %v", e.Tree)
 	}
 
 	if e.ID == 0 {

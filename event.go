@@ -16,8 +16,9 @@ type Metadata struct {
 	// Schema is the schema of the event.
 	Schema string `json:"schema"`
 
-	// Span is the ID of the span which contains all of this event's siblings.
-	Span ID `json:"span"`
+	// Tree is the ID of the tree which contains all of the events related to
+	// this one.
+	Tree ID `json:"tree"`
 
 	// ID is an ID uniquely identifying the event.
 	ID ID `json:"id"`
@@ -48,11 +49,12 @@ type Entry struct {
 	Event Event `json:"event"`
 }
 
-// NewEntry creates a new Entry instance for the given event.
-func NewEntry(span, parent ID, e Event) *Entry {
+// NewEntry creates a new Entry instance for the given event in the given tree
+// with the given parent.
+func NewEntry(tree, parent ID, e Event) *Entry {
 	return &Entry{Metadata: Metadata{
 		Schema: e.Schema(),
-		Span:   span,
+		Tree:   tree,
 		ID:     NewID(),
 		Parent: parent,
 		Time:   time.Now(),
