@@ -9,7 +9,7 @@ import (
 type EventLogger interface {
 	// Log adds the given event to the log stream, returning the logged event's
 	// unique ID.
-	Log(tree, parent ID, e Event) ID
+	Log(root, parent ID, e Event) ID
 }
 
 // NewJSONEventLogger returns an EventLogger which writes entries as streaming
@@ -30,8 +30,8 @@ type jsonEventLogger struct {
 	*json.Encoder
 }
 
-func (l jsonEventLogger) Log(tree, parent ID, e Event) ID {
-	entry := NewEntry(tree, parent, e)
+func (l jsonEventLogger) Log(root, parent ID, e Event) ID {
+	entry := NewEntry(root, parent, e)
 	if err := l.Encode(entry); err != nil {
 		panic(err)
 	}

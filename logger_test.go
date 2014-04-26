@@ -8,13 +8,13 @@ import (
 )
 
 func TestJSONEventLogger(t *testing.T) {
-	tree := NewID()
+	root := NewID()
 	parent := NewID()
 	ev := mockEvent{Example: "whee"}
 
 	buf := bytes.NewBuffer(nil)
 	logger := NewJSONEventLogger(buf)
-	id := logger.Log(tree, parent, ev)
+	id := logger.Log(root, parent, ev)
 
 	var e RawJSONEntry
 	if err := json.Unmarshal(buf.Bytes(), &e); err != nil {
@@ -25,8 +25,8 @@ func TestJSONEventLogger(t *testing.T) {
 		t.Errorf("Unexpected schema: %v", e.Schema)
 	}
 
-	if e.Tree != tree {
-		t.Errorf("Tree was %v, but expected %v", e.Tree, tree)
+	if e.Root != root {
+		t.Errorf("Root was %v, but expected %v", e.Root, root)
 	}
 
 	if e.ID != id {
