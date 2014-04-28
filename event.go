@@ -55,31 +55,33 @@ type Entry struct {
 // root entry for the first time you see a user request).
 func NewRootEntry(e Event) *Entry {
 	id := NewID()
-	return &Entry{Metadata: Metadata{
-		Schema: e.Schema(),
-		Root:   id,
-		ID:     id,
-		Time:   time.Now(),
-		Host:   host,
-		Deploy: deploy,
-		Event:  e,
-	},
+	return &Entry{
+		Metadata: Metadata{
+			Schema: e.Schema(),
+			Root:   id,
+			ID:     id,
+			Time:   time.Now(),
+			Host:   host,
+			Deploy: deploy,
+			Event:  e,
+		},
 		Event: e}
 }
 
 // NewEntry creates a new Entry instance for the given event in the given tree
 // with the given parent.
 func NewEntry(root, parent ID, e Event) *Entry {
-	return &Entry{Metadata: Metadata{
-		Schema: e.Schema(),
-		Root:   root,
-		ID:     NewID(),
-		Parent: parent,
-		Time:   time.Now(),
-		Host:   host,
-		Deploy: deploy,
-		Event:  e,
-	},
+	return &Entry{
+		Metadata: Metadata{
+			Schema: e.Schema(),
+			Root:   root,
+			ID:     NewID(),
+			Parent: parent,
+			Time:   time.Now(),
+			Host:   host,
+			Deploy: deploy,
+			Event:  e,
+		},
 		Event: e}
 }
 
