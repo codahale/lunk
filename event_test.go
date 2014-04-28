@@ -5,11 +5,6 @@ import (
 	"time"
 )
 
-var (
-	root   = ID(1)
-	parent = ID(2)
-)
-
 type mockEvent struct {
 	Example string `json:"example"`
 }
@@ -52,6 +47,8 @@ func TestNewRootEntry(t *testing.T) {
 }
 
 func TestNewEntry(t *testing.T) {
+	root := ID(1)
+	parent := ID(2)
 	ev := mockEvent{Example: "yay"}
 	e := NewEntry(root, parent, ev)
 
