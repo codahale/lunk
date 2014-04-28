@@ -36,9 +36,6 @@ type Metadata struct {
 	// environment variable on startup.
 	Deploy string `json:"deploy,omitempty"`
 
-	// Event is the actual event object, to be serialized as a nested
-	// object.
-	Event Event `json:"event"`
 }
 
 // An Entry is the combination of an event and its metadata.
@@ -63,7 +60,6 @@ func NewRootEntry(e Event) *Entry {
 			Time:   time.Now(),
 			Host:   host,
 			Deploy: deploy,
-			Event:  e,
 		},
 		Event: e}
 }
@@ -80,7 +76,6 @@ func NewEntry(root, parent ID, e Event) *Entry {
 			Time:   time.Now(),
 			Host:   host,
 			Deploy: deploy,
-			Event:  e,
 		},
 		Event: e}
 }
