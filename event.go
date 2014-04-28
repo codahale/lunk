@@ -36,6 +36,8 @@ type Metadata struct {
 	// environment variable on startup.
 	Deploy string `json:"deploy,omitempty"`
 
+	// PID is the process ID which generated the event.
+	PID int `json:"pid"`
 }
 
 // An Entry is the combination of an event and its metadata.
@@ -60,6 +62,7 @@ func NewRootEntry(e Event) *Entry {
 			Time:   time.Now(),
 			Host:   host,
 			Deploy: deploy,
+			PID:    pid,
 		},
 		Event: e}
 }
@@ -76,12 +79,14 @@ func NewEntry(root, parent ID, e Event) *Entry {
 			Time:   time.Now(),
 			Host:   host,
 			Deploy: deploy,
+			PID:    pid,
 		},
 		Event: e}
 }
 
 var (
 	host, deploy string
+	pid          int
 )
 
 func init() {
@@ -91,4 +96,5 @@ func init() {
 	}
 	host = h
 	deploy = os.Getenv("DEPLOY")
+	pid = os.Getpid()
 }

@@ -45,6 +45,10 @@ func TestJSONEventLoggerLog(t *testing.T) {
 		t.Errorf("Blank hostname for meta data")
 	}
 
+	if e.PID == 0 {
+		t.Errorf("Blank PID for meta data")
+	}
+
 	var newEV mockEvent
 	if err := json.Unmarshal(e.Event, &newEV); err != nil {
 		t.Fatal(err)
@@ -89,6 +93,10 @@ func TestJSONEventLoggerLogRoot(t *testing.T) {
 
 	if e.Host == "" {
 		t.Errorf("Blank hostname for meta data")
+	}
+
+	if e.PID == 0 {
+		t.Errorf("Blank PID for meta data")
 	}
 
 	var newEV mockEvent

@@ -41,6 +41,10 @@ func TestNewRootEntry(t *testing.T) {
 		t.Errorf("Blank hostname for meta data")
 	}
 
+	if e.PID == 0 {
+		t.Errorf("Blank PID for meta data")
+	}
+
 	if e.Event != ev {
 		t.Errorf("Unexpected properties: %v", e.Event)
 	}
@@ -74,6 +78,10 @@ func TestNewEntry(t *testing.T) {
 
 	if e.Host == "" {
 		t.Errorf("Blank hostname for meta data")
+	}
+
+	if e.PID == 0 {
+		t.Errorf("Blank PID for meta data")
 	}
 
 	if e.Event != ev {
