@@ -3,9 +3,45 @@ package lunk
 import "os"
 
 func Example() {
-	j := NewJSONEventLogger(os.Stdout)
+	l := NewJSONEventLogger(os.Stdout)
+	root := l.LogRoot(Message("root action"))
+	sub := l.Log(root, root, Message("sub action"))
+	l.Log(root, sub, Message("leaf action"))
 
-	root := j.LogRoot(Message("doing something"))
-	sub := j.Log(root, root, Message("doing some sub-action"))
-	j.Log(root, sub, Message("the sub-action involved something else"))
+	// Produces something like this:
+	// {
+	//     "event": {
+	//         "msg": "root action"
+	//     },
+	//     "pid": 44345,
+	//     "host": "server1.example.com",
+	//     "time": "2014-04-28T13:58:32.201883418-07:00",
+	//     "id": "09c84ee90e7d9b74",
+	//     "root": "09c84ee90e7d9b74",
+	//     "schema": "message"
+	// }
+	// {
+	//     "event": {
+	//         "msg": "sub action"
+	//     },
+	//     "pid": 44345,
+	//     "host": "server1.example.com",
+	//     "time": "2014-04-28T13:58:32.202241745-07:00",
+	//     "parent": "09c84ee90e7d9b74",
+	//     "id": "794f8bde67a7f1a7",
+	//     "root": "09c84ee90e7d9b74",
+	//     "schema": "message"
+	// }
+	// {
+	//     "event": {
+	//         "msg": "leaf action"
+	//     },
+	//     "pid": 44345,
+	//     "host": "server1.example.com",
+	//     "time": "2014-04-28T13:58:32.202257354-07:00",
+	//     "parent": "794f8bde67a7f1a7",
+	//     "id": "33cff19e8bfb7cef",
+	//     "root": "09c84ee90e7d9b74",
+	//     "schema": "message"
+	// }
 }
