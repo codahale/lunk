@@ -11,17 +11,22 @@ type Event interface {
 	Schema() string
 }
 
-// Metadata is a collection of metadata about an Event.
-type Metadata struct {
-	// Schema is the schema of the event.
-	Schema string `json:"schema"`
-
+// EventID is the ID of an event and its root event.
+type EventID struct {
 	// Root is the root ID of the tree which contains all of the events related
 	// to this one.
 	Root ID `json:"root"`
 
 	// ID is an ID uniquely identifying the event.
 	ID ID `json:"id"`
+}
+
+// Metadata is a collection of metadata about an Event.
+type Metadata struct {
+	EventID
+
+	// Schema is the schema of the event.
+	Schema string `json:"schema"`
 
 	// Parent is the ID of the parent event, if any.
 	Parent ID `json:"parent,omitempty"`
@@ -56,9 +61,11 @@ func NewRootEntry(e Event) *Entry {
 	id := NewID()
 	return &Entry{
 		Metadata: Metadata{
+			EventID: EventID{
+				Root: id,
+				ID:   id,
+			},
 			Schema: e.Schema(),
-			Root:   id,
-			ID:     id,
 			Time:   time.Now(),
 			Host:   host,
 			Deploy: deploy,
@@ -69,13 +76,15 @@ func NewRootEntry(e Event) *Entry {
 
 // NewEntry creates a new Entry instance for the given event in the given tree
 // with the given parent.
-func NewEntry(root, parent ID, e Event) *Entry {
+func NewEntry(parent EventID, e Event) *Entry {
 	return &Entry{
 		Metadata: Metadata{
+			EventID: EventID{
+				Root: parent.Root,
+				ID:   NewID(),
+			},
 			Schema: e.Schema(),
-			Root:   root,
-			ID:     NewID(),
-			Parent: parent,
+			Parent: parent.ID,
 			Time:   time.Now(),
 			Host:   host,
 			Deploy: deploy,

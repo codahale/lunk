@@ -5,8 +5,8 @@ import "os"
 func Example() {
 	l := NewJSONEventLogger(os.Stdout)
 	root := l.LogRoot(Message("root action"))
-	sub := l.Log(root, root, Message("sub action"))
-	l.Log(root, sub, Message("leaf action"))
+	sub := l.Log(root, Message("sub action"))
+	l.Log(sub, Message("leaf action"))
 
 	// Produces something like this:
 	// {

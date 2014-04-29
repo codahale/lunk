@@ -51,16 +51,18 @@ func TestNewRootEntry(t *testing.T) {
 }
 
 func TestNewEntry(t *testing.T) {
-	root := ID(1)
-	parent := ID(2)
+	id := EventID{
+		Root: 1,
+		ID:   2,
+	}
 	ev := mockEvent{Example: "yay"}
-	e := NewEntry(root, parent, ev)
+	e := NewEntry(id, ev)
 
 	if e.Schema != "example" {
 		t.Errorf("Unexpected schema: %v", e.Schema)
 	}
 
-	if e.Root != root {
+	if e.Root != id.Root {
 		t.Errorf("Unexpected root ID: %v", e.Root)
 	}
 
@@ -68,7 +70,7 @@ func TestNewEntry(t *testing.T) {
 		t.Errorf("Zero ID for entry")
 	}
 
-	if e.Parent != parent {
+	if e.Parent != id.ID {
 		t.Errorf("Unexpected parent: %v", e.Parent)
 	}
 

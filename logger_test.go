@@ -8,13 +8,15 @@ import (
 )
 
 func TestJSONEventLoggerLog(t *testing.T) {
-	root := NewID()
-	parent := NewID()
+	parent := EventID{
+		Root: NewID(),
+		ID:   NewID(),
+	}
 	ev := mockEvent{Example: "whee"}
 
 	buf := bytes.NewBuffer(nil)
 	logger := NewJSONEventLogger(buf)
-	id := logger.Log(root, parent, ev)
+	id := logger.Log(parent, ev)
 
 	var e RawJSONEntry
 	if err := json.Unmarshal(buf.Bytes(), &e); err != nil {
@@ -25,15 +27,15 @@ func TestJSONEventLoggerLog(t *testing.T) {
 		t.Errorf("Unexpected schema: %v", e.Schema)
 	}
 
-	if e.Root != root {
-		t.Errorf("Root was %v, but expected %v", e.Root, root)
+	if e.Root != parent.Root {
+		t.Errorf("Root was %v, but expected %v", e.Root, parent.Root)
 	}
 
-	if e.ID != id {
+	if e.ID != id.ID {
 		t.Errorf("ID was %v, but expected %v", e.ID, id)
 	}
 
-	if e.Parent != parent {
+	if e.Parent != parent.ID {
 		t.Errorf("Parent was %v, but expected %v", e.Parent, parent)
 	}
 
@@ -75,12 +77,12 @@ func TestJSONEventLoggerLogRoot(t *testing.T) {
 		t.Errorf("Unexpected schema: %v", e.Schema)
 	}
 
-	if e.Root != id {
-		t.Errorf("Root was %v, but expected %v", e.Root, id)
+	if e.Root != id.Root {
+		t.Errorf("Root was %v, but expected %v", e.Root, id.Root)
 	}
 
-	if e.ID != id {
-		t.Errorf("ID was %v, but expected %v", e.ID, id)
+	if e.ID != id.ID {
+		t.Errorf("ID was %v, but expected %v", e.ID, id.ID)
 	}
 
 	if e.Parent != 0 {
