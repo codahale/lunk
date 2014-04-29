@@ -1,8 +1,10 @@
-package lunk
+package web
 
 import (
 	"net/http"
 	"strings"
+
+	"github.com/codahale/lunk"
 )
 
 const (
@@ -12,18 +14,18 @@ const (
 )
 
 // SetRequestEventID sets the Event-ID header on the request.
-func SetRequestEventID(r *http.Request, e EventID) {
+func SetRequestEventID(r *http.Request, e lunk.EventID) {
 	r.Header.Set(HeaderEventID, e.String())
 }
 
 // GetRequestEventID returns the EventID for the request, nil if no Event-ID was
 // provided, or an error if the value was unparseable.
-func GetRequestEventID(r *http.Request) (*EventID, error) {
+func GetRequestEventID(r *http.Request) (*lunk.EventID, error) {
 	s := r.Header.Get(HeaderEventID)
 	if s == "" {
 		return nil, nil
 	}
-	return ParseEventID(s)
+	return lunk.ParseEventID(s)
 }
 
 var (

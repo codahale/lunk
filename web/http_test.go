@@ -1,19 +1,21 @@
-package lunk
+package web
 
 import (
 	"encoding/json"
 	"net/http"
 	"testing"
+
+	"github.com/codahale/lunk"
 )
 
-var _ Event = HTTPRequestEvent{}
+var _ lunk.Event = HTTPRequestEvent{}
 
 func TestSetRequestEventID(t *testing.T) {
 	r := http.Request{
 		Header: http.Header{},
 	}
 
-	SetRequestEventID(&r, EventID{
+	SetRequestEventID(&r, lunk.EventID{
 		Root: 100,
 		ID:   150,
 	})
