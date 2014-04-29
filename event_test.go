@@ -5,12 +5,65 @@ import (
 	"time"
 )
 
-type mockEvent struct {
-	Example string `json:"example"`
+func TestEventIDString(t *testing.T) {
+	id := EventID{
+		Root: 100,
+		ID:   200,
+	}
+
+	actual := id.String()
+	expected := "0000000000000064/00000000000000c8"
+	if actual != expected {
+		t.Errorf("Was %#v, but expected %#v", actual, expected)
+	}
 }
 
-func (mockEvent) Schema() string {
-	return "example"
+func TestParseEventID(t *testing.T) {
+	id, err := ParseEventID("0000000000000064/0000000000000096")
+
+	if id.Root != 100 || id.ID != 150 {
+		t.Errorf("Unexpected event ID: %+v", id)
+	}
+
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+}
+
+func TestParseEventIDBadRoot(t *testing.T) {
+	id, err := ParseEventID("000g000000000064/0000000000000096")
+
+	if id != nil {
+		t.Errorf("Unexpected event ID: %+v", id)
+	}
+
+	if err != ErrBadEventID {
+		t.Errorf("Unexpected error: %v", err)
+	}
+}
+
+func TestParseEventIDBadID(t *testing.T) {
+	id, err := ParseEventID("000000000000064/0000000g000000096")
+
+	if id != nil {
+		t.Errorf("Unexpected event ID: %+v", id)
+	}
+
+	if err != ErrBadEventID {
+		t.Errorf("Unexpected error: %v", err)
+	}
+}
+
+func TestParseEventIDTooFew(t *testing.T) {
+	id, err := ParseEventID("000000000000064")
+
+	if id != nil {
+		t.Errorf("Unexpected event ID: %+v", id)
+	}
+
+	if err != ErrBadEventID {
+		t.Errorf("Unexpected error: %v", err)
+	}
 }
 
 func TestNewRootEntry(t *testing.T) {
@@ -89,4 +142,12 @@ func TestNewEntry(t *testing.T) {
 	if e.Event != ev {
 		t.Errorf("Unexpected properties: %v", e.Event)
 	}
+}
+
+type mockEvent struct {
+	Example string `json:"example"`
+}
+
+func (mockEvent) Schema() string {
+	return "example"
 }

@@ -1,7 +1,10 @@
 package lunk
 
 import (
+	"errors"
+	"fmt"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -11,6 +14,11 @@ type Event interface {
 	Schema() string
 }
 
+var (
+	// ErrBadEventID is returned when the event ID cannot be parsed.
+	ErrBadEventID = errors.New("bad event ID")
+)
+
 // EventID is the ID of an event and its root event.
 type EventID struct {
 	// Root is the root ID of the tree which contains all of the events related
@@ -19,6 +27,34 @@ type EventID struct {
 
 	// ID is an ID uniquely identifying the event.
 	ID ID `json:"id"`
+}
+
+func (id EventID) String() string {
+	return fmt.Sprintf("%s/%s", id.Root, id.ID)
+}
+
+// ParseEventID parses the given string as two ID strings separated by a slash,
+// or returns an error.
+func ParseEventID(s string) (*EventID, error) {
+	parts := strings.Split(s, "/")
+	if len(parts) != 2 {
+		return nil, ErrBadEventID
+	}
+
+	root, err := ParseID(parts[0])
+	if err != nil {
+		return nil, ErrBadEventID
+	}
+
+	id, err := ParseID(parts[1])
+	if err != nil {
+		return nil, ErrBadEventID
+	}
+
+	return &EventID{
+		Root: root,
+		ID:   id,
+	}, nil
 }
 
 // Metadata is a collection of metadata about an Event.
