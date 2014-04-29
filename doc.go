@@ -75,8 +75,8 @@
 // ID.  In our photo example, we would assign a unique root ID as soon as the
 // edge server received the request.
 //
-// Events inside a tree are casually ordered: each event has a unique ID, and an
-// optional parent ID. By passing the IDs across systems, we establish casual
+// Events inside a tree are causally ordered: each event has a unique ID, and an
+// optional parent ID. By passing the IDs across systems, we establish causal
 // ordering between events. In our photo example, the two database queries from
 // the app would share the same parent ID--the ID of the event corresponding to
 // the app handling the request which caused those queries.
