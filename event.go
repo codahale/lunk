@@ -33,6 +33,12 @@ func (id EventID) String() string {
 	return fmt.Sprintf("%s/%s", id.Root, id.ID)
 }
 
+// Format formats according to a format specifier and returns the resulting
+// string. The receiver's root and ID are the first and second arguments.
+func (id EventID) Format(s string, args ...interface{}) string {
+	return fmt.Sprintf(s, append([]interface{}{id.Root, id.ID}, args...)...)
+}
+
 // ParseEventID parses the given string as two ID strings separated by a slash,
 // or returns an error.
 func ParseEventID(s string) (*EventID, error) {

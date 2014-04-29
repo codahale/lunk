@@ -18,6 +18,19 @@ func TestEventIDString(t *testing.T) {
 	}
 }
 
+func TestEventIDFormat(t *testing.T) {
+	id := EventID{
+		Root: 100,
+		ID:   200,
+	}
+
+	actual := id.Format("/* %s/%s */ %s", "SELECT 1")
+	expected := "/* 0000000000000064/00000000000000c8 */ SELECT 1"
+	if actual != expected {
+		t.Errorf("Was %#v, but expected %#v", actual, expected)
+	}
+}
+
 func TestParseEventID(t *testing.T) {
 	id, err := ParseEventID("0000000000000064/0000000000000096")
 
