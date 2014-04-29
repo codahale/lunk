@@ -8,36 +8,33 @@ import (
 
 var _ Event = HTTPRequestEvent{}
 
-func TestSetRootID(t *testing.T) {
-	root := ID(100)
-	parent := ID(150)
-
+func TestSetRequestEventID(t *testing.T) {
 	r := http.Request{
 		Header: http.Header{},
 	}
 
-	SetRootID(&r, root, parent)
+	SetRequestEventID(&r, EventID{
+		Root: 100,
+		ID:   150,
+	})
 
-	actual := r.Header.Get("Root-ID")
-	expected := "0000000000000064:0000000000000096"
+	actual := r.Header.Get("Event-ID")
+	expected := "0000000000000064/0000000000000096"
 	if actual != expected {
 		t.Errorf("Was %#v, but expected %#v", actual, expected)
 	}
 }
 
-func TestGetRootID(t *testing.T) {
+func TestGetRequestEventID(t *testing.T) {
 	r := http.Request{
 		Header: http.Header{},
 	}
-	r.Header.Add("Root-ID", "0000000000000064:0000000000000096")
+	r.Header.Add("Event-ID", "0000000000000064/0000000000000096")
 
-	root, parent, err := GetRootID(&r)
-	if root != 100 {
-		t.Errorf("Unexpected root ID: %v", root)
-	}
+	id, err := GetRequestEventID(&r)
 
-	if parent != 150 {
-		t.Errorf("Unexpected parent ID: %v", parent)
+	if id.Root != 100 || id.ID != 150 {
+		t.Errorf("Unexpected event ID: %+v", id)
 	}
 
 	if err != nil {
@@ -45,61 +42,18 @@ func TestGetRootID(t *testing.T) {
 	}
 }
 
-func TestGetRootIDMissing(t *testing.T) {
+func TestGetRequestEventIDMissing(t *testing.T) {
 	r := http.Request{
 		Header: http.Header{},
 	}
 
-	root, parent, err := GetRootID(&r)
-	if root != 0 {
-		t.Errorf("Unexpected root ID: %#v", root)
-	}
+	id, err := GetRequestEventID(&r)
 
-	if parent != 0 {
-		t.Errorf("Unexpected parent ID: %#v", parent)
+	if id != nil {
+		t.Errorf("Unexpected event ID: %+v", id)
 	}
 
 	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
-}
-
-func TestGetRootIDBadRoot(t *testing.T) {
-	r := http.Request{
-		Header: http.Header{},
-	}
-	r.Header.Add("Root-ID", "000g000000000064:0000000000000096")
-
-	root, parent, err := GetRootID(&r)
-	if root != 0 {
-		t.Errorf("Unexpected root ID: %v", root)
-	}
-
-	if parent != 0 {
-		t.Errorf("Unexpected parent ID: %v", parent)
-	}
-
-	if err.Error() != `strconv.ParseUint: parsing "000g000000000064": invalid syntax` {
-		t.Errorf("Unexpected error: %v", err)
-	}
-}
-
-func TestGetRootIDBadParent(t *testing.T) {
-	r := http.Request{
-		Header: http.Header{},
-	}
-	r.Header.Add("Root-ID", "000000000000064:0000000g000000096")
-
-	root, parent, err := GetRootID(&r)
-	if root != 100 {
-		t.Errorf("Unexpected root ID: %v", root)
-	}
-
-	if parent != 0 {
-		t.Errorf("Unexpected parent ID: %v", parent)
-	}
-
-	if err.Error() != `strconv.ParseUint: parsing "0000000g000000096": invalid syntax` {
 		t.Errorf("Unexpected error: %v", err)
 	}
 }

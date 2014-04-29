@@ -114,4 +114,17 @@
 // partially-ordered tree of events which were involved in the handling of that
 // request. All events with a common root ID are in a common tree, which allows
 // for O(M) retrieval for a tree of M events.
+//
+// Sending And Receiving HTTP Requests
+//
+// To send a request with a root ID and a parent ID, use the Event-ID HTTP
+// header:
+//
+//     GET /woo HTTP/1.1
+//     Accept: application/json
+//     Event-ID: d6cb1d852bbf32b6/6eeee64a8ef56225
+//
+// The header value is simply the root ID and event ID, hex-encoded in
+// little-endian form and concatenated with a slash. A server that receives a
+// request with this header can use this to properly parent its own events.
 package lunk

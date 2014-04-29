@@ -1,40 +1,29 @@
 package lunk
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 )
 
 const (
-	// RootID is the name of the HTTP header by which the root and parent IDs are
-	// passed to internal services.
-	RootID = "Root-ID"
+	// HeaderEventID is the name of the HTTP header by which the root and
+	// event IDs are passed along.
+	HeaderEventID = "Event-ID"
 )
 
-// SetRootID sets the Root-ID header on the request.
-func SetRootID(r *http.Request, root, parent ID) {
-	r.Header.Set(RootID, fmt.Sprintf("%s:%s", root, parent))
+// SetRequestEventID sets the Event-ID header on the request.
+func SetRequestEventID(r *http.Request, e EventID) {
+	r.Header.Set(HeaderEventID, e.String())
 }
 
-// GetRootID returns the root and parent IDs for the request.
-func GetRootID(r *http.Request) (root, parent ID, err error) {
-	s := r.Header.Get(RootID)
-	if s != "" {
-		parts := strings.SplitN(s, ":", 2)
-		if len(parts) == 2 {
-			root, err = ParseID(parts[0])
-			if err != nil {
-				return
-			}
-
-			parent, err = ParseID(parts[1])
-			if err != nil {
-				return
-			}
-		}
+// GetRequestEventID returns the EventID for the request, nil if no Event-ID was
+// provided, or an error if the value was unparseable.
+func GetRequestEventID(r *http.Request) (*EventID, error) {
+	s := r.Header.Get(HeaderEventID)
+	if s == "" {
+		return nil, nil
 	}
-	return
+	return ParseEventID(s)
 }
 
 var (
