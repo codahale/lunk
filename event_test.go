@@ -1,6 +1,8 @@
 package lunk
 
 import (
+	"database/sql"
+	"fmt"
 	"testing"
 	"time"
 )
@@ -29,6 +31,31 @@ func TestEventIDFormat(t *testing.T) {
 	if actual != expected {
 		t.Errorf("Was %#v, but expected %#v", actual, expected)
 	}
+}
+
+func ExampleEventID_Format() {
+	// Assume we're connected to a database.
+	var (
+		event  EventID
+		db     *sql.DB
+		userID int
+	)
+
+	// This passes the root ID and the parent event ID to the database, which
+	// allows us to correlate, for example, slow queries with the web requests
+	// which caused them.
+	query := event.Format(`/* %s/%s */ %s`, `SELECT email FROM users WHERE id = ?`)
+	r := db.QueryRow(query, userID)
+	if r == nil {
+		panic("user not found")
+	}
+
+	var email string
+	if err := r.Scan(&email); err != nil {
+		panic("couldn't read email")
+	}
+
+	fmt.Printf("User's email: %s\n", email)
 }
 
 func TestParseEventID(t *testing.T) {
