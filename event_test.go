@@ -7,14 +7,47 @@ import (
 	"time"
 )
 
+func TestNewRootEventID(t *testing.T) {
+	id := NewRootEventID()
+
+	if id.Parent != 0 {
+		t.Errorf("Unexpected parent: %+v", id)
+	}
+
+	if id.ID == 0 {
+		t.Errorf("Zero ID: %+v", id)
+	}
+
+	if id.Root != id.ID {
+		t.Errorf("Mismatched root: %+v", id)
+	}
+}
+
+func TestNewEventID(t *testing.T) {
+	root := NewRootEventID()
+	id := NewEventID(root)
+
+	if id.Parent != root.ID {
+		t.Errorf("Unexpected parent: %+v", id)
+	}
+
+	if id.ID == 0 {
+		t.Errorf("Zero ID: %+v", id)
+	}
+
+	if id.Root != root.ID {
+		t.Errorf("Mismatched root: %+v", id)
+	}
+}
+
 func TestEventIDString(t *testing.T) {
 	id := EventID{
 		Root: 100,
-		ID:   200,
+		ID:   300,
 	}
 
 	actual := id.String()
-	expected := "0000000000000064/00000000000000c8"
+	expected := "root=0000000000000064&id=000000000000012c"
 	if actual != expected {
 		t.Errorf("Was %#v, but expected %#v", actual, expected)
 	}
@@ -23,11 +56,11 @@ func TestEventIDString(t *testing.T) {
 func TestEventIDFormat(t *testing.T) {
 	id := EventID{
 		Root: 100,
-		ID:   200,
+		ID:   300,
 	}
 
-	actual := id.Format("/* %s/%s */ %s", "SELECT 1")
-	expected := "/* 0000000000000064/00000000000000c8 */ SELECT 1"
+	actual := id.Format("/* %s */ %s", "SELECT 1")
+	expected := "/* root=0000000000000064&id=000000000000012c */ SELECT 1"
 	if actual != expected {
 		t.Errorf("Was %#v, but expected %#v", actual, expected)
 	}
@@ -59,19 +92,31 @@ func ExampleEventID_Format() {
 }
 
 func TestParseEventID(t *testing.T) {
-	id, err := ParseEventID("0000000000000064/0000000000000096")
+	id, err := ParseEventID("root=0000000000000064&id=000000000000012c")
 
-	if id.Root != 100 || id.ID != 150 {
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	if id.Root != 100 || id.ID != 300 {
+		t.Errorf("Unexpected event ID: %+v", id)
+	}
+}
+
+func TestParseEventIDMalformed(t *testing.T) {
+	id, err := ParseEventID(`%h00root=0000000000000064&id=000000000000012c`)
+
+	if id != nil {
 		t.Errorf("Unexpected event ID: %+v", id)
 	}
 
-	if err != nil {
+	if err != ErrBadEventID {
 		t.Errorf("Unexpected error: %v", err)
 	}
 }
 
 func TestParseEventIDBadRoot(t *testing.T) {
-	id, err := ParseEventID("000g000000000064/0000000000000096")
+	id, err := ParseEventID("root=0000000000g000064&id=000000000000012c")
 
 	if id != nil {
 		t.Errorf("Unexpected event ID: %+v", id)
@@ -83,7 +128,7 @@ func TestParseEventIDBadRoot(t *testing.T) {
 }
 
 func TestParseEventIDBadID(t *testing.T) {
-	id, err := ParseEventID("000000000000064/0000000g000000096")
+	id, err := ParseEventID("root=0000000000000064&id=0000000000g00012c")
 
 	if id != nil {
 		t.Errorf("Unexpected event ID: %+v", id)
@@ -94,93 +139,24 @@ func TestParseEventIDBadID(t *testing.T) {
 	}
 }
 
-func TestParseEventIDTooFew(t *testing.T) {
-	id, err := ParseEventID("000000000000064")
+func TestNewMetadata(t *testing.T) {
+	e := mockEvent{Example: "yay"}
+	md := NewMetadata(e)
 
-	if id != nil {
-		t.Errorf("Unexpected event ID: %+v", id)
+	if md.Schema != "example" {
+		t.Errorf("Unexpected schema: %v", md.Schema)
 	}
 
-	if err != ErrBadEventID {
-		t.Errorf("Unexpected error: %v", err)
-	}
-}
-
-func TestNewRootEntry(t *testing.T) {
-	ev := mockEvent{Example: "yay"}
-	e := NewRootEntry(ev)
-
-	if e.Schema != "example" {
-		t.Errorf("Unexpected schema: %v", e.Schema)
+	if time.Now().Sub(md.Time) > 5*time.Millisecond {
+		t.Errorf("Unexpectedly old timestamp: %v", md.Time)
 	}
 
-	if e.Root != e.ID {
-		t.Errorf("Unexpected root ID: %v", e.Root)
-	}
-
-	if e.ID == 0 {
-		t.Errorf("Zero ID for entry")
-	}
-
-	if e.Parent != 0 {
-		t.Errorf("Unexpected parent: %v", e.Parent)
-	}
-
-	if time.Now().Sub(e.Time) > 5*time.Millisecond {
-		t.Errorf("Unexpectedly old timestamp: %v", e.Time)
-	}
-
-	if e.Host == "" {
+	if md.Host == "" {
 		t.Errorf("Blank hostname for meta data")
 	}
 
-	if e.PID == 0 {
+	if md.PID == 0 {
 		t.Errorf("Blank PID for meta data")
-	}
-
-	if e.Event != ev {
-		t.Errorf("Unexpected properties: %v", e.Event)
-	}
-}
-
-func TestNewEntry(t *testing.T) {
-	id := EventID{
-		Root: 1,
-		ID:   2,
-	}
-	ev := mockEvent{Example: "yay"}
-	e := NewEntry(id, ev)
-
-	if e.Schema != "example" {
-		t.Errorf("Unexpected schema: %v", e.Schema)
-	}
-
-	if e.Root != id.Root {
-		t.Errorf("Unexpected root ID: %v", e.Root)
-	}
-
-	if e.ID == 0 {
-		t.Errorf("Zero ID for entry")
-	}
-
-	if e.Parent != id.ID {
-		t.Errorf("Unexpected parent: %v", e.Parent)
-	}
-
-	if time.Now().Sub(e.Time) > 5*time.Millisecond {
-		t.Errorf("Unexpectedly old timestamp: %v", e.Time)
-	}
-
-	if e.Host == "" {
-		t.Errorf("Blank hostname for meta data")
-	}
-
-	if e.PID == 0 {
-		t.Errorf("Blank PID for meta data")
-	}
-
-	if e.Event != ev {
-		t.Errorf("Unexpected properties: %v", e.Event)
 	}
 }
 

@@ -10,24 +10,24 @@
 // Consider a user-initiated web request. Their browser sends an HTTP request to
 // an edge server, which extracts the credentials (e.g., OAuth token) and
 // authenticates the request by communicating with an internal authentication
-// service, which returns a signed set of internal credentials (e.g., signed user
-// ID). The edge web server then proxies the request to a cluster of web servers,
-// each running a PHP application. The PHP application loads some data from
-// several databases, places the user in a number of treatment groups for running
-// A/B experiments, writes some data to a Dynamo-style distributed database, and
-// returns an HTML response. The edge server receives this response and proxies
-// it to the user's browser.
+// service, which returns a signed set of internal credentials (e.g., signed
+// user ID). The edge web server then proxies the request to a cluster of web
+// servers, each running a PHP application. The PHP application loads some data
+// from several databases, places the user in a number of treatment groups for
+// running A/B experiments, writes some data to a Dynamo-style distributed
+// database, and returns an HTML response. The edge server receives this
+// response and proxies it to the user's browser.
 //
 // In this scenario we have a number of infrastructure-specific events:
 //
-//     1.  The edge server handled a request, which took 142ms and whose response
-//         had a status of "200 OK".
+//     1.  The edge server handled a request, which took 142ms and whose
+//         response had a status of "200 OK".
 //     2.  The edge server sent a request to the authentication service, which
 //         took 5ms to handle and identified the principal as user 14002.
-//     3.  The authentication service handled a request, which took 4ms to handle
-//         and was served entirely from memory.
-//     4.  The edge server proxied a request to the app cluster, which took 132ms
-//         and whose response had a status of "200 OK".
+//     3.  The authentication service handled a request, which took 4ms to
+//         handle and was served entirely from memory.
+//     4.  The edge server proxied a request to the app cluster, which took
+//         132ms and whose response had a status of "200 OK".
 //     5.  The app load balancer handled a request, which took 131ms and whose
 //         response had a status of "200 OK".
 //     6.  The app load balancer proxied a request to the app, which took 130ms
@@ -47,15 +47,15 @@
 // the infrastructure, but are still critical information for the business the
 // system supports:
 //
-//     14. The app gave the user the control treatment for experiment 15 ("Really
-//         Big Buttons v2").
+//     14. The app gave the user the control treatment for experiment 15
+//         ("Really Big Buttons v2").
 //     15. The app gave the user the experimental treatment for experiment 54
 //         ("More Yelling v1").
 //     16. User 14002 viewed photo 1819 ("rude-puppy.gif").
 //
 // There are a number of different teams all trying to monitor and improve
-// aspects of this system. Operational staff need to know if a particular host or
-// service is experiencing a latency spike or drop in throughput. Development
+// aspects of this system. Operational staff need to know if a particular host
+// or service is experiencing a latency spike or drop in throughput. Development
 // staff need to know if their application's response times have gone down as a
 // result of a recent deploy. Customer support staff need to know if the system
 // is operating nominally as a whole, and for customers in particular. Product
@@ -99,14 +99,14 @@
 // latency is over 300ms, mostly as a result of requests like those in tree
 // XXXXX).
 //
-// For offline causational analysis, events can be written in batches to
-// batch processing systems like Hadoop or OLAP databases like Vertica. These
-// aggregates can be queried to answer questions traditionally reserved for
-// A/B testing systems. "Did users who were show the new navbar view more
-// photos?" "Did the new image optimization algorithm we enabled for 1% of views
-// run faster? Did it produce smaller images? Did it have any effect on user
-// engagement?" "Did any services have increased exception rates after any recent
-// deploys?" &tc &tc
+// For offline causational analysis, events can be written in batches to batch
+// processing systems like Hadoop or OLAP databases like Vertica. These
+// aggregates can be queried to answer questions traditionally reserved for A/B
+// testing systems. "Did users who were show the new navbar view more photos?"
+// "Did the new image optimization algorithm we enabled for 1% of views run
+// faster? Did it produce smaller images? Did it have any effect on user
+// engagement?" "Did any services have increased exception rates after any
+// recent deploys?" &tc &tc
 //
 // Observing Specific Events
 //
@@ -124,7 +124,7 @@
 //     Accept: application/json
 //     Event-ID: d6cb1d852bbf32b6/6eeee64a8ef56225
 //
-// The header value is simply the root ID and event ID, hex-encoded in
-// little-endian form and concatenated with a slash. A server that receives a
-// request with this header can use this to properly parent its own events.
+// The header value is simply the root ID and event ID, hex-encoded and
+// concatenated with a slash. A server that receives a request with this header
+// can use this to properly parent its own events.
 package lunk

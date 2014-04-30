@@ -4,9 +4,15 @@ import "os"
 
 func Example() {
 	l := NewJSONEventLogger(os.Stdout)
-	root := l.LogRoot(Message("root action"))
-	sub := l.Log(root, Message("sub action"))
-	l.Log(sub, Message("leaf action"))
+
+	rootID := NewRootEventID()
+	l.Log(rootID, Message("root action"))
+
+	subID := NewEventID(rootID)
+	l.Log(subID, Message("sub action"))
+
+	leafID := NewEventID(rootID)
+	l.Log(leafID, Message("leaf action"))
 
 	// Produces something like this:
 	// {

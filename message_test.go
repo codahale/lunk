@@ -15,8 +15,15 @@ func TestMessage(t *testing.T) {
 
 	actual := string(j)
 	expected := `{"msg":"whee"}`
-
 	if actual != expected {
 		t.Errorf("Was %#v, but expected %#v", actual, expected)
+	}
+}
+
+func TestMessageSchema(t *testing.T) {
+	e := Message("whee")
+
+	if e.Schema() != "message" {
+		t.Errorf("Unexpected schema: %v", e.Schema())
 	}
 }

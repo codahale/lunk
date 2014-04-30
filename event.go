@@ -3,8 +3,8 @@ package lunk
 import (
 	"errors"
 	"fmt"
+	"net/url"
 	"os"
-	"strings"
 	"time"
 )
 
@@ -19,7 +19,7 @@ var (
 	ErrBadEventID = errors.New("bad event ID")
 )
 
-// EventID is the ID of an event and its root event.
+// EventID is the ID of an event, its parent event, and its root event.
 type EventID struct {
 	// Root is the root ID of the tree which contains all of the events related
 	// to this one.
@@ -27,32 +27,58 @@ type EventID struct {
 
 	// ID is an ID uniquely identifying the event.
 	ID ID `json:"id"`
+
+	// Parent is the ID of the parent event, if any.
+	Parent ID `json:"parent,omitempty"`
 }
 
+// String returns the EventID as a URL-encoded set of parameters.
 func (id EventID) String() string {
-	return fmt.Sprintf("%s/%s", id.Root, id.ID)
+	return fmt.Sprintf("root=%s&id=%s", id.Root, id.ID)
 }
 
 // Format formats according to a format specifier and returns the resulting
-// string. The receiver's root and ID are the first and second arguments.
+// string. The receiver's string representation is the first argument.
 func (id EventID) Format(s string, args ...interface{}) string {
-	return fmt.Sprintf(s, append([]interface{}{id.Root, id.ID}, args...)...)
+	args = append([]interface{}{id.String()}, args...)
+	return fmt.Sprintf(s, args...)
 }
 
-// ParseEventID parses the given string as two ID strings separated by a slash,
-// or returns an error.
-func ParseEventID(s string) (*EventID, error) {
-	parts := strings.Split(s, "/")
-	if len(parts) != 2 {
-		return nil, ErrBadEventID
+// NewRootEventID generates a new event ID for a root event. This should only be
+// used to generate entries for events caused exclusively by events which are
+// outside of your system as a whole (e.g., a root event for the first time you
+// see a user request).
+func NewRootEventID() EventID {
+	id := NewID()
+	return EventID{
+		Root: id,
+		ID:   id,
 	}
+}
 
-	root, err := ParseID(parts[0])
+// NewEventID returns a new ID for an event which is the child of the given
+// parent ID. This should be used to track causal relationships between events.
+func NewEventID(parent EventID) EventID {
+	return EventID{
+		Root:   parent.Root,
+		ID:     NewID(),
+		Parent: parent.ID,
+	}
+}
+
+// ParseEventID parses the given string as a URL-encoded set of parameters.
+func ParseEventID(s string) (*EventID, error) {
+	u, err := url.ParseQuery(s)
 	if err != nil {
 		return nil, ErrBadEventID
 	}
 
-	id, err := ParseID(parts[1])
+	root, err := ParseID(u.Get("root"))
+	if err != nil {
+		return nil, ErrBadEventID
+	}
+
+	id, err := ParseID(u.Get("id"))
 	if err != nil {
 		return nil, ErrBadEventID
 	}
@@ -65,13 +91,8 @@ func ParseEventID(s string) (*EventID, error) {
 
 // Metadata is a collection of metadata about an Event.
 type Metadata struct {
-	EventID
-
 	// Schema is the schema of the event.
 	Schema string `json:"schema"`
-
-	// Parent is the ID of the parent event, if any.
-	Parent ID `json:"parent,omitempty"`
 
 	// Time is the timestamp of the event.
 	Time time.Time `json:"time"`
@@ -87,52 +108,24 @@ type Metadata struct {
 	PID int `json:"pid"`
 }
 
+// NewMetdata returns a populated Metadata instance for the given event.
+func NewMetadata(e Event) Metadata {
+	return Metadata{
+		Schema: e.Schema(),
+		Time:   time.Now(),
+		Host:   host,
+		Deploy: deploy,
+		PID:    pid,
+	}
+}
+
 // An Entry is the combination of an event and its metadata.
 type Entry struct {
+	EventID
 	Metadata
 
-	// Event is the actual event object, to be serialized as a object.
+	// Event is the actual event object, to be serialized to JSON.
 	Event Event `json:"event"`
-}
-
-// NewRootEntry creates a new Entry instance for the root event in the given
-// tree. This should only be used to generate entries for events caused
-// exclusively by events which are outside of your system as a whole (e.g., a
-// root entry for the first time you see a user request).
-func NewRootEntry(e Event) *Entry {
-	id := NewID()
-	return &Entry{
-		Metadata: Metadata{
-			EventID: EventID{
-				Root: id,
-				ID:   id,
-			},
-			Schema: e.Schema(),
-			Time:   time.Now(),
-			Host:   host,
-			Deploy: deploy,
-			PID:    pid,
-		},
-		Event: e}
-}
-
-// NewEntry creates a new Entry instance for the given event in the given tree
-// with the given parent.
-func NewEntry(parent EventID, e Event) *Entry {
-	return &Entry{
-		Metadata: Metadata{
-			EventID: EventID{
-				Root: parent.Root,
-				ID:   NewID(),
-			},
-			Schema: e.Schema(),
-			Parent: parent.ID,
-			Time:   time.Now(),
-			Host:   host,
-			Deploy: deploy,
-			PID:    pid,
-		},
-		Event: e}
 }
 
 var (
