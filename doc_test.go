@@ -11,7 +11,7 @@ func Example() {
 	subID := NewEventID(rootID)
 	l.Log(subID, Message("sub action"))
 
-	leafID := NewEventID(rootID)
+	leafID := NewEventID(subID)
 	l.Log(leafID, Message("leaf action"))
 
 	// Produces something like this:
