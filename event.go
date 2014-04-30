@@ -108,7 +108,7 @@ type Metadata struct {
 	PID int `json:"pid"`
 }
 
-// NewMetdata returns a populated Metadata instance for the given event.
+// NewMetadata returns a populated Metadata instance for the given event.
 func NewMetadata(e Event) Metadata {
 	return Metadata{
 		Schema: e.Schema(),
