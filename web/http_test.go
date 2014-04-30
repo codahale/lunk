@@ -21,7 +21,7 @@ func TestSetRequestEventID(t *testing.T) {
 	})
 
 	actual := r.Header.Get("Event-ID")
-	expected := "0000000000000064/0000000000000096"
+	expected := "root=0000000000000064&id=0000000000000096"
 	if actual != expected {
 		t.Errorf("Was %#v, but expected %#v", actual, expected)
 	}
@@ -31,16 +31,15 @@ func TestGetRequestEventID(t *testing.T) {
 	r := http.Request{
 		Header: http.Header{},
 	}
-	r.Header.Add("Event-ID", "0000000000000064/0000000000000096")
+	r.Header.Add("Event-ID", "root=0000000000000064&id=0000000000000096")
 
 	id, err := GetRequestEventID(&r)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
 
 	if id.Root != 100 || id.ID != 150 {
 		t.Errorf("Unexpected event ID: %+v", id)
-	}
-
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
 	}
 }
 
