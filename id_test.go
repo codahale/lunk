@@ -68,11 +68,11 @@ func TestIDUnmarshalJSONNonHexString(t *testing.T) {
 	}
 }
 
-func TestNewID(t *testing.T) {
+func TestIDGeneration(t *testing.T) {
 	n := 10000
 	ids := make(map[ID]bool, n)
 	for i := 0; i < n; i++ {
-		id := NewID()
+		id := generateID()
 		if ids[id] {
 			t.Errorf("Duplicate ID: %v", id)
 		}
@@ -99,8 +99,8 @@ func TestParseIDError(t *testing.T) {
 	}
 }
 
-func BenchmarkNewID(b *testing.B) {
+func BenchmarkIDGeneration(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		NewID()
+		generateID()
 	}
 }
