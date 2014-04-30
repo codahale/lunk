@@ -23,7 +23,7 @@ func Example() {
 	//     "host": "server1.example.com",
 	//     "time": "2014-04-28T13:58:32.201883418-07:00",
 	//     "id": "09c84ee90e7d9b74",
-	//     "root": "09c84ee90e7d9b74",
+	//     "root": "ca2e3c0fdfcf3f5e",
 	//     "schema": "message"
 	// }
 	// {
@@ -35,7 +35,7 @@ func Example() {
 	//     "time": "2014-04-28T13:58:32.202241745-07:00",
 	//     "parent": "09c84ee90e7d9b74",
 	//     "id": "794f8bde67a7f1a7",
-	//     "root": "09c84ee90e7d9b74",
+	//     "root": "ca2e3c0fdfcf3f5e",
 	//     "schema": "message"
 	// }
 	// {
@@ -47,7 +47,7 @@ func Example() {
 	//     "time": "2014-04-28T13:58:32.202257354-07:00",
 	//     "parent": "794f8bde67a7f1a7",
 	//     "id": "33cff19e8bfb7cef",
-	//     "root": "09c84ee90e7d9b74",
+	//     "root": "ca2e3c0fdfcf3f5e",
 	//     "schema": "message"
 	// }
 }

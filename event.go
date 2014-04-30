@@ -49,10 +49,9 @@ func (id EventID) Format(s string, args ...interface{}) string {
 // outside of your system as a whole (e.g., a root event for the first time you
 // see a user request).
 func NewRootEventID() EventID {
-	id := generateID()
 	return EventID{
-		Root: id,
-		ID:   id,
+		Root: generateID(),
+		ID:   generateID(),
 	}
 }
 

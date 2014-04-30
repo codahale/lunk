@@ -18,8 +18,12 @@ func TestNewRootEventID(t *testing.T) {
 		t.Errorf("Zero ID: %+v", id)
 	}
 
-	if id.Root != id.ID {
-		t.Errorf("Mismatched root: %+v", id)
+	if id.Root == 0 {
+		t.Errorf("Zero root: %+v", id)
+	}
+
+	if id.Root == id.ID {
+		t.Errorf("Duplicate IDs: %+v", id)
 	}
 }
 
@@ -35,7 +39,7 @@ func TestNewEventID(t *testing.T) {
 		t.Errorf("Zero ID: %+v", id)
 	}
 
-	if id.Root != root.ID {
+	if id.Root != root.Root {
 		t.Errorf("Mismatched root: %+v", id)
 	}
 }
