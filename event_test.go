@@ -51,7 +51,21 @@ func TestEventIDString(t *testing.T) {
 	}
 
 	actual := id.String()
-	expected := "root=0000000000000064&id=000000000000012c"
+	expected := "0000000000000064/000000000000012c"
+	if actual != expected {
+		t.Errorf("Was %#v, but expected %#v", actual, expected)
+	}
+}
+
+func TestEventIDStringWithParent(t *testing.T) {
+	id := EventID{
+		Root:   100,
+		Parent: 200,
+		ID:     300,
+	}
+
+	actual := id.String()
+	expected := "0000000000000064/000000000000012c/00000000000000c8"
 	if actual != expected {
 		t.Errorf("Was %#v, but expected %#v", actual, expected)
 	}
@@ -64,7 +78,7 @@ func TestEventIDFormat(t *testing.T) {
 	}
 
 	actual := id.Format("/* %s */ %s", "SELECT 1")
-	expected := "/* root=0000000000000064&id=000000000000012c */ SELECT 1"
+	expected := "/* 0000000000000064/000000000000012c */ SELECT 1"
 	if actual != expected {
 		t.Errorf("Was %#v, but expected %#v", actual, expected)
 	}
@@ -96,7 +110,7 @@ func ExampleEventID_Format() {
 }
 
 func TestParseEventID(t *testing.T) {
-	id, err := ParseEventID("root=0000000000000064&id=000000000000012c")
+	id, err := ParseEventID("0000000000000064/000000000000012c")
 
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
@@ -107,8 +121,20 @@ func TestParseEventID(t *testing.T) {
 	}
 }
 
+func TestParseEventIDWithParent(t *testing.T) {
+	id, err := ParseEventID("0000000000000064/000000000000012c/0000000000000096")
+
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	if id.Root != 100 || id.Parent != 150 || id.ID != 300 {
+		t.Errorf("Unexpected event ID: %+v", id)
+	}
+}
+
 func TestParseEventIDMalformed(t *testing.T) {
-	id, err := ParseEventID(`%h00root=0000000000000064&id=000000000000012c`)
+	id, err := ParseEventID(`0000000000000064000000000000012c`)
 
 	if id != nil {
 		t.Errorf("Unexpected event ID: %+v", id)
@@ -120,7 +146,7 @@ func TestParseEventIDMalformed(t *testing.T) {
 }
 
 func TestParseEventIDBadRoot(t *testing.T) {
-	id, err := ParseEventID("root=0000000000g000064&id=000000000000012c")
+	id, err := ParseEventID("0000000000g000064/000000000000012c")
 
 	if id != nil {
 		t.Errorf("Unexpected event ID: %+v", id)
@@ -132,7 +158,19 @@ func TestParseEventIDBadRoot(t *testing.T) {
 }
 
 func TestParseEventIDBadID(t *testing.T) {
-	id, err := ParseEventID("root=0000000000000064&id=0000000000g00012c")
+	id, err := ParseEventID("0000000000000064/0000000000g00012c")
+
+	if id != nil {
+		t.Errorf("Unexpected event ID: %+v", id)
+	}
+
+	if err != ErrBadEventID {
+		t.Errorf("Unexpected error: %v", err)
+	}
+}
+
+func TestParseEventIDBadParent(t *testing.T) {
+	id, err := ParseEventID("0000000000000064/000000000000012c/00000000000g0096")
 
 	if id != nil {
 		t.Errorf("Unexpected event ID: %+v", id)

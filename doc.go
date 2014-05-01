@@ -122,9 +122,10 @@
 //
 //     GET /woo HTTP/1.1
 //     Accept: application/json
-//     Event-ID: root=d6cb1d852bbf32b6&id=6eeee64a8ef56225
+//     Event-ID: d6cb1d852bbf32b6/6eeee64a8ef56225
 //
-// The header value is simply the root ID and event ID, hex-encoded and URL
-// encoded. A server that receives a request with this header can use this to
-// properly parent its own events.
+// The header value is simply the root ID and event ID, hex-encoded and
+// separated with a slash. If the event has a parent ID, that may be included as
+// an optional third parameter.  A server that receives a request with this
+// header can use this to properly parent its own events.
 package lunk

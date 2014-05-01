@@ -3,8 +3,8 @@ package lunk
 import (
 	"errors"
 	"fmt"
-	"net/url"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -32,9 +32,21 @@ type EventID struct {
 	Parent ID `json:"parent,omitempty"`
 }
 
-// String returns the EventID as a URL-encoded set of parameters.
+// String returns the EventID as a slash-separated, set of hex-encoded
+// parameters (root, ID, parent). If the EventID has no parent, that value is
+// elided.
 func (id EventID) String() string {
-	return fmt.Sprintf("root=%s&id=%s", id.Root, id.ID)
+	if id.Parent == 0 {
+		return fmt.Sprintf("%s%s%s", id.Root, EventIDDelimiter, id.ID)
+	}
+	return fmt.Sprintf(
+		"%s%s%s%s%s",
+		id.Root,
+		EventIDDelimiter,
+		id.ID,
+		EventIDDelimiter,
+		id.Parent,
+	)
 }
 
 // Format formats according to a format specifier and returns the resulting
@@ -65,26 +77,42 @@ func NewEventID(parent EventID) EventID {
 	}
 }
 
-// ParseEventID parses the given string as a URL-encoded set of parameters.
+const (
+	// EventIDDelimiter is the delimiter used to concatenate an EventID's
+	// components.
+	EventIDDelimiter = "/"
+)
+
+// ParseEventID parses the given string as a slash-separated set of parameters.
 func ParseEventID(s string) (*EventID, error) {
-	u, err := url.ParseQuery(s)
+	parts := strings.Split(s, EventIDDelimiter)
+	if len(parts) != 2 && len(parts) != 3 {
+		return nil, ErrBadEventID
+	}
+
+	root, err := ParseID(parts[0])
 	if err != nil {
 		return nil, ErrBadEventID
 	}
 
-	root, err := ParseID(u.Get("root"))
+	id, err := ParseID(parts[1])
 	if err != nil {
 		return nil, ErrBadEventID
 	}
 
-	id, err := ParseID(u.Get("id"))
-	if err != nil {
-		return nil, ErrBadEventID
+	var parent ID
+	if len(parts) == 3 {
+		i, err := ParseID(parts[2])
+		if err != nil {
+			return nil, ErrBadEventID
+		}
+		parent = i
 	}
 
 	return &EventID{
-		Root: root,
-		ID:   id,
+		Root:   root,
+		ID:     id,
+		Parent: parent,
 	}, nil
 }
 
