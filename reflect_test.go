@@ -66,7 +66,7 @@ func TestFlattenNamedValues(t *testing.T) {
 	}
 }
 
-func TestFlattenTimes(t *testing.T) {
+func TestFlattenTime(t *testing.T) {
 	e := struct {
 		Value time.Time
 	}{
