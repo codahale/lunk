@@ -128,4 +128,12 @@
 // separated with a slash. If the event has a parent ID, that may be included as
 // an optional third parameter.  A server that receives a request with this
 // header can use this to properly parent its own events.
+//
+// Event Properties
+//
+// Each event has a set of named properties, the keys and values of which are
+// strings. This allows aggregation layers to take advantage of simplifying
+// assumptions and either store events in normalized form (with event data
+// separate from property data) or in denormalized form (essentially
+// pre-materializing an outer join of the normalized relations).
 package lunk

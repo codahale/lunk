@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"reflect"
 	"strings"
 	"time"
 )
@@ -116,8 +117,10 @@ func ParseEventID(s string) (*EventID, error) {
 	}, nil
 }
 
-// Metadata is a collection of metadata about an Event.
-type Metadata struct {
+// An Entry is the combination of an event and its metadata.
+type Entry struct {
+	EventID
+
 	// Schema is the schema of the event.
 	Schema string `json:"schema"`
 
@@ -133,26 +136,27 @@ type Metadata struct {
 
 	// PID is the process ID which generated the event.
 	PID int `json:"pid"`
+
+	// Properties are the flattened event properties.
+	Properties map[string]string `json:"properties"`
 }
 
-// NewMetadata returns a populated Metadata instance for the given event.
-func NewMetadata(e Event) Metadata {
-	return Metadata{
-		Schema: e.Schema(),
-		Time:   time.Now(),
-		Host:   host,
-		Deploy: deploy,
-		PID:    pid,
+// NewEntry creates a new entry for the given ID and event.
+func NewEntry(id EventID, e Event) Entry {
+	props := make(map[string]string, 10)
+	flattenValue("", reflect.ValueOf(e), func(k, v string) {
+		props[k] = v
+	})
+
+	return Entry{
+		EventID:    id,
+		Schema:     e.Schema(),
+		Time:       time.Now(),
+		Host:       host,
+		Deploy:     deploy,
+		PID:        pid,
+		Properties: props,
 	}
-}
-
-// An Entry is the combination of an event and its metadata.
-type Entry struct {
-	EventID
-	Metadata
-
-	// Event is the actual event object, to be serialized to JSON.
-	Event Event `json:"event"`
 }
 
 var (

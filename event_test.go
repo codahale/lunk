@@ -3,6 +3,7 @@ package lunk
 import (
 	"database/sql"
 	"fmt"
+	"reflect"
 	"testing"
 	"time"
 )
@@ -181,29 +182,40 @@ func TestParseEventIDBadParent(t *testing.T) {
 	}
 }
 
-func TestNewMetadata(t *testing.T) {
-	e := mockEvent{Example: "yay"}
-	md := NewMetadata(e)
+func TestNewEntry(t *testing.T) {
+	id := NewRootEventID()
+	e := NewEntry(id, mockEvent{Example: "yay"})
 
-	if md.Schema != "example" {
-		t.Errorf("Unexpected schema: %v", md.Schema)
+	if e.EventID != id {
+		t.Errorf("Was %v but expected %v", e.EventID, id)
 	}
 
-	if time.Now().Sub(md.Time) > 5*time.Millisecond {
-		t.Errorf("Unexpectedly old timestamp: %v", md.Time)
+	if e.Schema != "example" {
+		t.Errorf("Unexpected schema: %v", e.Schema)
 	}
 
-	if md.Host == "" {
+	if time.Now().Sub(e.Time) > 5*time.Millisecond {
+		t.Errorf("Unexpectedly old timestamp: %v", e.Time)
+	}
+
+	if e.Host == "" {
 		t.Errorf("Blank hostname for meta data")
 	}
 
-	if md.PID == 0 {
+	if e.PID == 0 {
 		t.Errorf("Blank PID for meta data")
+	}
+
+	expected := map[string]string{
+		"example": "yay",
+	}
+	if !reflect.DeepEqual(e.Properties, expected) {
+		t.Errorf("Was %+v, but expected %+v", e.Properties, expected)
 	}
 }
 
 type mockEvent struct {
-	Example string `json:"example"`
+	Example string
 }
 
 func (mockEvent) Schema() string {
