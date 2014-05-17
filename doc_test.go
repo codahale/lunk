@@ -16,7 +16,7 @@ func Example() {
 
 	// Produces something like this:
 	// {
-	//     "event": {
+	//     "properties": {
 	//         "msg": "root action"
 	//     },
 	//     "pid": 44345,
@@ -27,7 +27,7 @@ func Example() {
 	//     "schema": "message"
 	// }
 	// {
-	//     "event": {
+	//     "properties": {
 	//         "msg": "sub action"
 	//     },
 	//     "pid": 44345,
@@ -39,7 +39,7 @@ func Example() {
 	//     "schema": "message"
 	// }
 	// {
-	//     "event": {
+	//     "properties": {
 	//         "msg": "leaf action"
 	//     },
 	//     "pid": 44345,
