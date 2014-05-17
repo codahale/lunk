@@ -3,6 +3,7 @@ package web
 import (
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/codahale/lunk"
 )
@@ -62,7 +63,7 @@ type HTTPRequestEvent struct {
 	RemoteAddr    string            `lunk:"remote_addr"`
 	ContentLength int64             `lunk:"content_length"`
 	Status        int               `lunk:"status"`
-	ElapsedMillis float64           `lunk:"elapsed_ms"`
+	Elapsed       time.Duration     `lunk:"elapsed"`
 }
 
 // Schema returns the constant "httprequest".

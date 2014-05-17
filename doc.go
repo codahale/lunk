@@ -135,5 +135,6 @@
 // strings. This allows aggregation layers to take advantage of simplifying
 // assumptions and either store events in normalized form (with event data
 // separate from property data) or in denormalized form (essentially
-// pre-materializing an outer join of the normalized relations).
+// pre-materializing an outer join of the normalized relations). Durations are
+// always recorded as fractional milliseconds.
 package lunk

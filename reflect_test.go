@@ -329,6 +329,26 @@ func TestFlattenCacheFields(t *testing.T) {
 	}
 }
 
+func TestFlattenDuration(t *testing.T) {
+	e := struct {
+		Value time.Duration
+	}{
+		Value: 500 * time.Microsecond,
+	}
+
+	actual := make(map[string]string)
+	flattenValue("", reflect.ValueOf(e), func(k, v string) {
+		actual[k] = v
+	})
+
+	expected := map[string]string{
+		"value": "0.5",
+	}
+	if !reflect.DeepEqual(actual, expected) {
+		t.Errorf("Was %#v, but expected %#v", actual, expected)
+	}
+}
+
 func TestFlattenPointers(t *testing.T) {
 	s := "woo"
 	e := struct {

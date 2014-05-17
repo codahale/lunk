@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/codahale/lunk"
 )
@@ -79,7 +80,7 @@ func TestHTTPRequest(t *testing.T) {
 
 	e := HTTPRequest(r)
 	e.Status = 200
-	e.ElapsedMillis = 4.3
+	e.Elapsed = 4300 * time.Microsecond
 
 	if e.Schema() != "httprequest" {
 		t.Errorf("Unexpected schema: %v", e.Schema())
@@ -87,7 +88,7 @@ func TestHTTPRequest(t *testing.T) {
 
 	actual := lunk.NewEntry(lunk.NewRootEventID(), e).Properties
 	expected := map[string]string{
-		"elapsed_ms":            "4.3",
+		"elapsed":               "4.3",
 		"headers.connection":    "close",
 		"headers.accept":        "application/json",
 		"headers.authorization": "REDACTED",
