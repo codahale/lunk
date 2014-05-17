@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"reflect"
+	"regexp"
 	"testing"
 	"time"
 )
@@ -55,6 +56,66 @@ func TestJSONEventLoggerLog(t *testing.T) {
 	actual := e.Properties
 	if !reflect.DeepEqual(actual, expected) {
 		t.Errorf("Properties were %+v, expected %+v", actual, expected)
+	}
+}
+
+func TestTextLogger(t *testing.T) {
+	ev := mockEvent{Example: "whee"}
+
+	buf := bytes.NewBuffer(nil)
+	logger := NewTextEventLogger(buf)
+	id := EventID{
+		Root:   100,
+		Parent: 150,
+		ID:     200,
+	}
+	logger.Log(id, ev)
+
+	expected := regexp.MustCompile(
+		`^time="[\d]{4}-[\d]{2}-[\d]{2}T[\d]{2}:[\d]{2}:[\d]{2}Z"` +
+			` host="[^"]+"` +
+			` pid="[\d]+"` +
+			` deploy="[^"]*"` +
+			` schema="example"` +
+			` id="00000000000000c8"` +
+			` root="0000000000000064"` +
+			` parent="0000000000000096"` +
+			` p:example="whee"` +
+			`\n$`,
+	)
+	actual := buf.String()
+
+	if !expected.MatchString(actual) {
+		t.Errorf("Was `%s` but expected to match `%s`", actual, expected)
+	}
+}
+
+func TestTextLoggerElidedParentID(t *testing.T) {
+	ev := mockEvent{Example: "whee"}
+
+	buf := bytes.NewBuffer(nil)
+	logger := NewTextEventLogger(buf)
+	id := EventID{
+		Root: 100,
+		ID:   200,
+	}
+	logger.Log(id, ev)
+
+	expected := regexp.MustCompile(
+		`^time="[\d]{4}-[\d]{2}-[\d]{2}T[\d]{2}:[\d]{2}:[\d]{2}Z"` +
+			` host="[^"]+"` +
+			` pid="[\d]+"` +
+			` deploy="[^"]*"` +
+			` schema="example"` +
+			` id="00000000000000c8"` +
+			` root="0000000000000064"` +
+			` p:example="whee"` +
+			`\n$`,
+	)
+	actual := buf.String()
+
+	if !expected.MatchString(actual) {
+		t.Errorf("Was `%s` but expected to match `%s`", actual, expected)
 	}
 }
 
