@@ -20,6 +20,8 @@ func flattenValue(prefix string, v reflect.Value, f func(k, v string)) {
 	}
 
 	switch v.Kind() {
+	case reflect.Ptr:
+		flattenValue(prefix, v.Elem(), f)
 	case reflect.Bool:
 		f(prefix, strconv.FormatBool(v.Bool()))
 	case reflect.Float32, reflect.Float64:
