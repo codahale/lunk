@@ -1,8 +1,8 @@
 package web
 
 import (
-	"encoding/json"
 	"net/http"
+	"reflect"
 	"testing"
 
 	"github.com/codahale/lunk"
@@ -61,6 +61,7 @@ func TestGetRequestEventIDMissing(t *testing.T) {
 
 func TestHTTPRequest(t *testing.T) {
 	r := &http.Request{
+		Host:          "example.com",
 		Method:        "GET",
 		RequestURI:    "/woohoo",
 		Proto:         "HTTP/1.1",
@@ -84,14 +85,21 @@ func TestHTTPRequest(t *testing.T) {
 		t.Errorf("Unexpected schema: %v", e.Schema())
 	}
 
-	data, err := json.Marshal(e)
-	if err != nil {
-		t.Fatal(err)
+	actual := lunk.NewEntry(lunk.NewRootEventID(), e).Properties
+	expected := map[string]string{
+		"elapsed_ms":            "4.3",
+		"headers.connection":    "close",
+		"headers.accept":        "application/json",
+		"headers.authorization": "REDACTED",
+		"proto":                 "HTTP/1.1",
+		"remote_addr":           "127.0.0.1",
+		"host":                  "example.com",
+		"content_length":        "0",
+		"status":                "200",
+		"method":                "GET",
+		"uri":                   "/woohoo",
 	}
-
-	actual := string(data)
-	expected := `{"method":"GET","uri":"/woohoo","proto":"HTTP/1.1","headers":{"Accept":["application/json"],"Authorization":["REDACTED"],"Connection":["close"]},"host":"","remote_addr":"127.0.0.1","content_length":0,"status":200,"elapsed_ms":4.3}`
-	if actual != expected {
-		t.Errorf("Was `%s`, but expected `%v`", actual, expected)
+	if !reflect.DeepEqual(actual, expected) {
+		t.Errorf("Was %#v, but expected %#v", actual, expected)
 	}
 }

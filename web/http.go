@@ -54,15 +54,15 @@ func HTTPRequest(r *http.Request) *HTTPRequestEvent {
 
 // HTTPRequestEvent records
 type HTTPRequestEvent struct {
-	Method        string      `json:"method"`
-	URI           string      `json:"uri"`
-	Proto         string      `json:"proto"`
-	Headers       http.Header `json:"headers"`
-	Host          string      `json:"host"`
-	RemoteAddr    string      `json:"remote_addr"`
-	ContentLength int64       `json:"content_length"`
-	Status        int         `json:"status"`
-	ElapsedMillis float64     `json:"elapsed_ms"`
+	Method        string            `lunk:"method"`
+	URI           string            `lunk:"uri"`
+	Proto         string            `lunk:"proto"`
+	Headers       map[string]string `lunk:"headers"`
+	Host          string            `lunk:"host"`
+	RemoteAddr    string            `lunk:"remote_addr"`
+	ContentLength int64             `lunk:"content_length"`
+	Status        int               `lunk:"status"`
+	ElapsedMillis float64           `lunk:"elapsed_ms"`
 }
 
 // Schema returns the constant "httprequest".
@@ -74,7 +74,7 @@ var (
 	redacted = []string{"REDACTED"}
 )
 
-func redactHeaders(r *http.Request) http.Header {
+func redactHeaders(r *http.Request) map[string]string {
 	h := make(http.Header, len(r.Header)+len(r.Trailer))
 	for k, v := range r.Header {
 		if isRedacted(k) {
@@ -90,7 +90,12 @@ func redactHeaders(r *http.Request) http.Header {
 			h[k] = append(h[k], v...)
 		}
 	}
-	return h
+
+	m := make(map[string]string, len(h))
+	for k, v := range h {
+		m[strings.ToLower(k)] = strings.Join(v, ",")
+	}
+	return m
 }
 
 func isRedacted(name string) bool {
