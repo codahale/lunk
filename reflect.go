@@ -15,7 +15,7 @@ func flattenValue(prefix string, v reflect.Value, f func(k, v string)) {
 		f(prefix, o.Format(time.RFC3339Nano))
 		return
 	case time.Duration:
-		ms := float64(o.Nanoseconds()) / 1000000.0
+		ms := float64(o.Nanoseconds()) / 1e6
 		f(prefix, strconv.FormatFloat(ms, 'f', -1, 64))
 		return
 	case fmt.Stringer:
