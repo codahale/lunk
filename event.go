@@ -151,7 +151,7 @@ func NewEntry(id EventID, e Event) Entry {
 	return Entry{
 		EventID:    id,
 		Schema:     e.Schema(),
-		Time:       time.Now(),
+		Time:       time.Now().In(time.UTC),
 		Host:       host,
 		Deploy:     deploy,
 		PID:        pid,

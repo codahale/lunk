@@ -198,6 +198,10 @@ func TestNewEntry(t *testing.T) {
 		t.Errorf("Unexpectedly old timestamp: %v", e.Time)
 	}
 
+	if e.Time.Location() != time.UTC {
+		t.Errorf("Unexpectedly non-UTC timestamp: %v", e.Time)
+	}
+
 	if e.Host == "" {
 		t.Errorf("Blank hostname for meta data")
 	}
