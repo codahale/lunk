@@ -137,4 +137,11 @@
 // separate from property data) or in denormalized form (essentially
 // pre-materializing an outer join of the normalized relations). Durations are
 // always recorded as fractional milliseconds.
+//
+// Log Formats
+//
+// Lunk currently provides two formats for log entries: text and
+// JSON. Text-based logs encode each entry as a single line of text, using
+// key="value" formatting for all properties. Event property keys are scoped to
+// avoid collisions. JSON logs encode each entry as a single JSON object.
 package lunk
