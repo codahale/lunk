@@ -17,6 +17,8 @@ func TestJSONEventLoggerLog(t *testing.T) {
 	id := NewRootEventID()
 	logger.Log(id, ev)
 
+	t.Log(buf.String())
+
 	var e Entry
 	if err := json.Unmarshal(buf.Bytes(), &e); err != nil {
 		t.Fatal(err)
@@ -59,7 +61,7 @@ func TestJSONEventLoggerLog(t *testing.T) {
 	}
 }
 
-func TestTextLogger(t *testing.T) {
+func TestTextEventLoggerLog(t *testing.T) {
 	ev := mockEvent{Example: "whee"}
 
 	buf := bytes.NewBuffer(nil)
@@ -70,6 +72,8 @@ func TestTextLogger(t *testing.T) {
 		ID:     200,
 	}
 	logger.Log(id, ev)
+
+	t.Log(buf.String())
 
 	expected := regexp.MustCompile(
 		`^time="[\d]{4}-[\d]{2}-[\d]{2}T[\d]{2}:[\d]{2}:[\d]{2}Z"` +
@@ -90,7 +94,7 @@ func TestTextLogger(t *testing.T) {
 	}
 }
 
-func TestTextLoggerElidedParentID(t *testing.T) {
+func TestTextEventLoggerLogElidedParentID(t *testing.T) {
 	ev := mockEvent{Example: "whee"}
 
 	buf := bytes.NewBuffer(nil)
@@ -128,6 +132,18 @@ func (nullWriter) Write(a []byte) (int, error) {
 func BenchmarkJSONEventLogger(b *testing.B) {
 	ev := mockEvent{Example: "whee"}
 	logger := NewJSONEventLogger(nullWriter{})
+	id := NewRootEventID()
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		logger.Log(id, ev)
+	}
+}
+
+func BenchmarkTextEventLogger(b *testing.B) {
+	ev := mockEvent{Example: "whee"}
+	logger := NewTextEventLogger(nullWriter{})
 	id := NewRootEventID()
 	b.ReportAllocs()
 	b.ResetTimer()
