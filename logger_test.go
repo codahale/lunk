@@ -123,6 +123,73 @@ func TestTextEventLoggerLogElidedParentID(t *testing.T) {
 	}
 }
 
+func TestSamplingEventLogger(t *testing.T) {
+	e := mockEvent{}
+	l := fakeLogger{}
+	sl := NewSamplingEventLogger(&l)
+
+	for i := 0; i < 10000; i++ {
+		sl.Log(EventID{ID: ID(i)}, e)
+	}
+
+	if len(l.events) != 10000 {
+		t.Errorf("Unexpectedly few logged events: %d", len(l.events))
+	}
+}
+
+func TestSamplingEventLoggerSchemaRates(t *testing.T) {
+	e := mockEvent{}
+	l := fakeLogger{}
+	sl := NewSamplingEventLogger(&l)
+	sl.SetSchemaSampleRate(e.Schema(), 0.5)
+
+	for i := 0; i < 10000; i++ {
+		sl.Log(EventID{ID: ID(i)}, e)
+	}
+
+	if 4500 > len(l.events) {
+		t.Errorf("Unexpectedly few logged events: %d", len(l.events))
+	}
+
+	if len(l.events) > 5500 {
+		t.Errorf("Unexpectedly many logged events: %d", len(l.events))
+	}
+}
+
+func TestSamplingEventLoggerRootRates(t *testing.T) {
+	e := mockEvent{}
+	l := fakeLogger{}
+	sl := NewSamplingEventLogger(&l)
+	root := ID(200)
+	sl.SetSchemaSampleRate(e.Schema(), 0.5)
+	sl.SetRootSampleRate(root, 0.75)
+
+	for i := 0; i < 10000; i++ {
+		sl.Log(EventID{ID: ID(i), Root: root}, e)
+	}
+
+	if 7000 > len(l.events) {
+		t.Errorf("Unexpectedly few logged events: %d", len(l.events))
+	}
+
+	if len(l.events) > 8000 {
+		t.Errorf("Unexpectedly many logged events: %d", len(l.events))
+	}
+}
+
+type fakeLogging struct {
+	id EventID
+	e  Event
+}
+
+type fakeLogger struct {
+	events []fakeLogging
+}
+
+func (l *fakeLogger) Log(id EventID, e Event) {
+	l.events = append(l.events, fakeLogging{id: id, e: e})
+}
+
 type nullWriter struct{}
 
 func (nullWriter) Write(a []byte) (int, error) {
@@ -144,6 +211,22 @@ func BenchmarkJSONEventLogger(b *testing.B) {
 func BenchmarkTextEventLogger(b *testing.B) {
 	ev := mockEvent{Example: "whee"}
 	logger := NewTextEventLogger(nullWriter{})
+	id := NewRootEventID()
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		logger.Log(id, ev)
+	}
+}
+
+type nullEventLogger struct{}
+
+func (nullEventLogger) Log(id EventID, e Event) {}
+
+func BenchmarkSamplingEventLogger(b *testing.B) {
+	ev := mockEvent{Example: "whee"}
+	logger := NewSamplingEventLogger(nullEventLogger{})
 	id := NewRootEventID()
 	b.ReportAllocs()
 	b.ResetTimer()
