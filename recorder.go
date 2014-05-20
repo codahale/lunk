@@ -2,7 +2,6 @@ package lunk
 
 import (
 	"encoding/csv"
-	"io"
 	"strconv"
 	"time"
 )
@@ -10,35 +9,31 @@ import (
 // An EntryRecorder records entries, e.g. to a streaming processing system or an
 // OLAP database.
 type EntryRecorder interface {
-	io.Closer
 	Record(Entry) error
 }
 
 // NewNormalizedCSVEntryRecorder returns an EntryRecorder which writes events to
 // one CSV file and properties to another.
-func NewNormalizedCSVEntryRecorder(events, props io.Writer) EntryRecorder {
-	r := nCSVRecorder{
-		events: csv.NewWriter(events),
-		props:  csv.NewWriter(props),
+func NewNormalizedCSVEntryRecorder(events, props *csv.Writer) EntryRecorder {
+	return nCSVRecorder{
+		events: events,
+		props:  props,
 	}
-	r.events.Write(nEventHeader)
-	r.props.Write(nPropHeader)
-	return r
 }
 
 // NewDenormalizedCSVEntryRecorder returns an EntryRecorder which writes events
 // and their properties to a single CSV file, duplicating event data when
 // necessary.
-func NewDenormalizedCSVEntryRecorder(w io.Writer) EntryRecorder {
-	r := dCSVRecorder{
-		w: csv.NewWriter(w),
+func NewDenormalizedCSVEntryRecorder(w *csv.Writer) EntryRecorder {
+	return dCSVRecorder{
+		w: w,
 	}
-	r.w.Write(dEventHeader)
-	return r
 }
 
 var (
-	nEventHeader = []string{
+	// NormalizedEventHeaders are the set of headers used for storing events in
+	// normalized CSV files.
+	NormalizedEventHeaders = []string{
 		"root",
 		"id",
 		"parent",
@@ -48,14 +43,20 @@ var (
 		"pid",
 		"deploy",
 	}
-	nPropHeader = []string{
+
+	// NormalizedPropertyHeaders are the set of headers used for storing
+	// properties in normalized CSV files.
+	NormalizedPropertyHeaders = []string{
 		"root",
 		"id",
 		"parent",
 		"prop_name",
 		"prop_value",
 	}
-	dEventHeader = []string{
+
+	// DenormalizedEventHeaders are the set of headers used for storing events
+	// in denormalized CSV files.
+	DenormalizedEventHeaders = []string{
 		"root",
 		"id",
 		"parent",
@@ -106,12 +107,6 @@ func (r nCSVRecorder) Record(e Entry) error {
 	return nil
 }
 
-func (r nCSVRecorder) Close() error {
-	r.events.Flush()
-	r.props.Flush()
-	return nil
-}
-
 type dCSVRecorder struct {
 	w *csv.Writer
 }
@@ -139,10 +134,5 @@ func (r dCSVRecorder) Record(e Entry) error {
 
 	}
 
-	return nil
-}
-
-func (r dCSVRecorder) Close() error {
-	r.w.Flush()
 	return nil
 }

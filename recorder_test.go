@@ -10,7 +10,11 @@ import (
 
 func TestNormalizedCSVEntryRecorder(t *testing.T) {
 	eB, pB := bytes.NewBuffer(nil), bytes.NewBuffer(nil)
-	r := NewNormalizedCSVEntryRecorder(eB, pB)
+	eW, pW := csv.NewWriter(eB), csv.NewWriter(pB)
+	eW.Write(NormalizedEventHeaders)
+	pW.Write(NormalizedPropertyHeaders)
+
+	r := NewNormalizedCSVEntryRecorder(eW, pW)
 
 	e := Entry{
 		EventID: EventID{
@@ -32,7 +36,8 @@ func TestNormalizedCSVEntryRecorder(t *testing.T) {
 	if err := r.Record(e); err != nil {
 		t.Fatal(err)
 	}
-	r.Close()
+	eW.Flush()
+	pW.Flush()
 
 	eR := csv.NewReader(bytes.NewReader(eB.Bytes()))
 	pR := csv.NewReader(bytes.NewReader(pB.Bytes()))
@@ -105,7 +110,9 @@ func TestNormalizedCSVEntryRecorder(t *testing.T) {
 
 func TestDenormalizedCSVEntryRecorder(t *testing.T) {
 	buf := bytes.NewBuffer(nil)
-	r := NewDenormalizedCSVEntryRecorder(buf)
+	w := csv.NewWriter(buf)
+	w.Write(DenormalizedEventHeaders)
+	r := NewDenormalizedCSVEntryRecorder(w)
 
 	e := Entry{
 		EventID: EventID{
@@ -127,7 +134,7 @@ func TestDenormalizedCSVEntryRecorder(t *testing.T) {
 	if err := r.Record(e); err != nil {
 		t.Fatal(err)
 	}
-	r.Close()
+	w.Flush()
 
 	events, err := csv.NewReader(bytes.NewReader(buf.Bytes())).ReadAll()
 	if err != nil {
