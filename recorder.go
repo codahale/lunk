@@ -17,20 +17,57 @@ type EntryRecorder interface {
 // NewNormalizedCSVEntryRecorder returns an EntryRecorder which writes events to
 // one CSV file and properties to another.
 func NewNormalizedCSVEntryRecorder(events, props io.Writer) EntryRecorder {
-	return nCSVRecorder{
+	r := nCSVRecorder{
 		events: csv.NewWriter(events),
 		props:  csv.NewWriter(props),
 	}
+	r.events.Write(nEventHeader)
+	r.props.Write(nPropHeader)
+	return r
 }
 
 // NewDenormalizedCSVEntryRecorder returns an EntryRecorder which writes events
 // and their properties to a single CSV file, duplicating event data when
 // necessary.
 func NewDenormalizedCSVEntryRecorder(w io.Writer) EntryRecorder {
-	return dCSVRecorder{
+	r := dCSVRecorder{
 		w: csv.NewWriter(w),
 	}
+	r.w.Write(dEventHeader)
+	return r
 }
+
+var (
+	nEventHeader = []string{
+		"root",
+		"id",
+		"parent",
+		"schema",
+		"time",
+		"host",
+		"pid",
+		"deploy",
+	}
+	nPropHeader = []string{
+		"root",
+		"id",
+		"parent",
+		"prop_name",
+		"prop_value",
+	}
+	dEventHeader = []string{
+		"root",
+		"id",
+		"parent",
+		"schema",
+		"time",
+		"host",
+		"pid",
+		"deploy",
+		"prop_name",
+		"prop_value",
+	}
+)
 
 type nCSVRecorder struct {
 	events *csv.Writer

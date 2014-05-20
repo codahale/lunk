@@ -49,6 +49,16 @@ func TestNormalizedCSVEntryRecorder(t *testing.T) {
 
 	expected := [][]string{
 		[]string{
+			"root",
+			"id",
+			"parent",
+			"schema",
+			"time",
+			"host",
+			"pid",
+			"deploy",
+		},
+		[]string{
 			"0000000000000064",
 			"00000000000000c8",
 			"0000000000000096",
@@ -65,6 +75,13 @@ func TestNormalizedCSVEntryRecorder(t *testing.T) {
 	}
 
 	expected = [][]string{
+		[]string{
+			"root",
+			"id",
+			"parent",
+			"prop_name",
+			"prop_value",
+		},
 		[]string{
 			"0000000000000064",
 			"00000000000000c8",
@@ -117,6 +134,18 @@ func TestDenormalizedCSVEntryRecorder(t *testing.T) {
 		t.Fatal(err)
 	}
 	expected := [][]string{
+		[]string{
+			"root",
+			"id",
+			"parent",
+			"schema",
+			"time",
+			"host",
+			"pid",
+			"deploy",
+			"prop_name",
+			"prop_value",
+		},
 		[]string{
 			"0000000000000064",
 			"00000000000000c8",
