@@ -2,6 +2,7 @@ package lunk
 
 import (
 	"encoding/csv"
+	"sort"
 	"strconv"
 	"time"
 )
@@ -91,7 +92,14 @@ func (r nCSVRecorder) Record(e Entry) error {
 		return err
 	}
 
-	for k, v := range e.Properties {
+	keys := make([]string, 0, len(e.Properties))
+	for k := range e.Properties {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	for _, k := range keys {
+		v := e.Properties[k]
 		if err := r.props.Write([]string{
 			root,
 			id,
